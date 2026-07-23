@@ -1,11 +1,21 @@
+export type EmployeeStatus = "Active" | "Inactive";
+
 export interface Employee {
     id: number;
-    name: string;
+    employeeId: string;
+
+    firstName: string;
+    lastName: string;
+
     email: string;
+
     department: string;
     designation: string;
+
     salary: number;
     quantity: number;
-    joiningDate: string;
-    status: "Active" | "Inactive";
+
+    joiningDate: String;
+
+    status: EmployeeStatus;
 }
