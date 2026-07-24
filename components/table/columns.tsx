@@ -8,6 +8,13 @@ import { IconButton, Stack } from "@mui/material";
 import SortableHeader from "./SortableHeader"
 import type { Employee } from "../../types/employee";
 import EditableCell from "./EditableCell"
+import { formatDate } from "../../utils/formatDate";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import {
+    saveEmployee,
+    cancelEmployee,
+    undoEmployee,
+} from "../../store/employee/employeeSlice";
 
 const columnHelper = createColumnHelper<Employee>();
 
@@ -133,6 +140,9 @@ export const getColumns = () => [
                 title="Joining Date"
                 column={column}
             />
+        ),
+        cell: ({ getValue }) => (
+            formatDate(getValue())
         ),
     }),
 
