@@ -2,10 +2,11 @@ import { Box, Typography } from "@mui/material";
 import { generateEmployees } from "../utils/generateEmployees";
 import EmployeeToolbar from "../components/toolbar/EmployeeToolbar";
 import EmployeeTable from "../components/table/EmployeeTable";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 const Home = () => {
     const employees = useMemo(() => generateEmployees(10000), []);
+    const [globalFilter, setGlobalFilter] = useState("");
 
     return (
         <Box sx={{ p: 4 }}>
@@ -21,9 +22,16 @@ const Home = () => {
                 Manage employee information and perform inline editing.
             </Typography>
 
-            <EmployeeToolbar />
+            <EmployeeToolbar
+                globalFilter={globalFilter}
+                onGlobalFilterChange={setGlobalFilter}
+            />
 
-            <EmployeeTable data={employees} />
+            <EmployeeTable
+                data={employees}
+                globalFilter={globalFilter}
+                onGlobalFilterChange={setGlobalFilter}
+            />
         </Box>
     );
 };

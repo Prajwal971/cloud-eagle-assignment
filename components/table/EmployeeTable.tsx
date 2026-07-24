@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import {
     getCoreRowModel,
+    getFilteredRowModel,
     getSortedRowModel,
     useReactTable,
     type SortingState,
@@ -22,9 +23,15 @@ import { useState } from "react";
 
 interface EmployeeTableProps {
     data: Employee[];
+    globalFilter: string;
+    onGlobalFilterChange: (value: string) => void;
 }
 
-const EmployeeTable = ({ data }: EmployeeTableProps) => {
+const EmployeeTable = ({
+    data,
+    globalFilter,
+    onGlobalFilterChange,
+}: EmployeeTableProps) => {
     const [sorting, setSorting] = useState<SortingState>([]);
 
     const table = useReactTable({
@@ -33,13 +40,17 @@ const EmployeeTable = ({ data }: EmployeeTableProps) => {
 
         state: {
             sorting,
+            globalFilter,
         },
+        onGlobalFilterChange,
 
         onSortingChange: setSorting,
 
         getSortedRowModel: getSortedRowModel(),
 
         getCoreRowModel: getCoreRowModel(),
+
+        getFilteredRowModel: getFilteredRowModel(),
     });
 
     console.log(table);

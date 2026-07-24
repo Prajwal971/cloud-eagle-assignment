@@ -1,14 +1,22 @@
-import { Box } from "@mui/material";
+import { Box, TextField } from "@mui/material";
 
-const EmployeeToolbar = () => {
+interface EmployeeToolbarProps {
+    globalFilter: string;
+    onGlobalFilterChange: (value: string) => void;
+}
+
+
+const EmployeeToolbar = ({
+    globalFilter,
+    onGlobalFilterChange,
+}: EmployeeToolbarProps) => {
     return (
-        <Box
-            sx={{
-                mb: 3,
-            }}
-        >
-            Toolbar
-        </Box>
+        <TextField
+            label="Search"
+            size="small"
+            value={globalFilter}
+            onChange={(e) => onGlobalFilterChange(e.target.value)}
+        />
     );
 };
 
