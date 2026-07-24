@@ -14,6 +14,8 @@ import {
     useAppSelector,
 } from "../../store/hooks";
 
+import { exportToCSV } from "../../utils/exportToCSV";
+
 interface EmployeeToolbarProps {
     globalFilter: string;
     onGlobalFilterChange: (value: string) => void;
@@ -27,6 +29,10 @@ const EmployeeToolbar = ({
 
     const hasUnsavedChanges = useAppSelector(
         (state) => state.employee.hasUnsavedChanges
+    );
+
+    const employees = useAppSelector(
+        (state) => state.employee.employees
     );
 
     return (
@@ -46,6 +52,13 @@ const EmployeeToolbar = ({
                     onGlobalFilterChange(e.target.value)
                 }
             />
+
+            <Button
+                variant="outlined"
+                onClick={() => exportToCSV(employees)}
+            >
+                Export CSV
+            </Button>
 
             <Box sx={{ display: "flex", gap: 2 }}>
                 <Button
