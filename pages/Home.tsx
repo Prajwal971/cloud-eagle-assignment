@@ -1,12 +1,28 @@
+import { useEffect, useState } from "react";
 import { Box, Typography } from "@mui/material";
+
+
+import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { generateEmployees } from "../utils/generateEmployees";
 import EmployeeToolbar from "../components/toolbar/EmployeeToolbar";
 import EmployeeTable from "../components/table/EmployeeTable";
-import { useMemo, useState } from "react";
+import { setEmployees } from "../store/employee/employeeSlice";
 
 const Home = () => {
-    const employees = useMemo(() => generateEmployees(10000), []);
+    const dispatch = useAppDispatch();
+    const employees = useAppSelector(
+        (state) => state.employee.employees
+    );
     const [globalFilter, setGlobalFilter] = useState("");
+
+
+    useEffect(() => {
+        dispatch(
+            setEmployees(
+                generateEmployees(10000)
+            )
+        );
+    }, [dispatch]);
 
     return (
         <Box sx={{ p: 4 }}>
