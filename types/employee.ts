@@ -15,7 +15,7 @@ export interface Employee {
     salary: number;
     quantity: number;
 
-    joiningDate: String;
+    joiningDate: string;
 
     status: EmployeeStatus;
 }

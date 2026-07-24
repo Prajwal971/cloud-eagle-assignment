@@ -1,3 +1,4 @@
+import { memo, useCallback, useMemo, useRef, useState } from "react";
 import {
     Paper,
     Table,
@@ -8,18 +9,21 @@ import {
     TableRow,
 } from "@mui/material";
 import {
+    flexRender,
     getCoreRowModel,
     getFilteredRowModel,
     getSortedRowModel,
+    type Row,
     useReactTable,
     type SortingState,
 } from "@tanstack/react-table";
-import { flexRender } from "@tanstack/react-table";
-
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 import type { Employee } from "../../types/employee";
-import { columns } from "./columns";
-import { useState } from "react";
+import { getColumns } from "./columns";
+
+const ROW_HEIGHT = 60;
+const OVERSCAN_ROWS = 8;
 
 interface EmployeeTableProps {
     data: Employee[];
@@ -27,12 +31,43 @@ interface EmployeeTableProps {
     onGlobalFilterChange: (value: string) => void;
 }
 
+interface EmployeeDataRowProps {
+    measureElement: (element: HTMLTableRowElement | null) => void;
+    row: Row<Employee>;
+    virtualIndex: number;
+}
+
+const EmployeeDataRow = memo(({
+    measureElement,
+    row,
+    virtualIndex,
+}: EmployeeDataRowProps) => (
+    <TableRow
+        hover
+        data-index={virtualIndex}
+        ref={measureElement}
+    >
+        {row.getVisibleCells().map((cell) => (
+            <TableCell key={cell.id}>
+                {flexRender(
+                    cell.column.columnDef.cell,
+                    cell.getContext()
+                )}
+            </TableCell>
+        ))}
+    </TableRow>
+));
+
+EmployeeDataRow.displayName = "EmployeeDataRow";
+
 const EmployeeTable = ({
     data,
     globalFilter,
     onGlobalFilterChange,
 }: EmployeeTableProps) => {
     const [sorting, setSorting] = useState<SortingState>([]);
+    const columns = useMemo(() => getColumns(), []);
+    const tableContainerRef = useRef<HTMLDivElement>(null);
 
     const table = useReactTable({
         data,
@@ -53,14 +88,44 @@ const EmployeeTable = ({
         getFilteredRowModel: getFilteredRowModel(),
     });
 
-    console.log(table);
+    const { rows } = table.getRowModel();
+    const visibleColumnCount = table.getVisibleLeafColumns().length;
+
+    const rowVirtualizer = useVirtualizer({
+        count: rows.length,
+        getScrollElement: () => tableContainerRef.current,
+        estimateSize: () => ROW_HEIGHT,
+        getItemKey: (index) => rows[index]?.id ?? index,
+        overscan: OVERSCAN_ROWS,
+    });
+
+    const measureElement = useCallback(
+        (element: HTMLTableRowElement | null) => {
+            if (element) {
+                rowVirtualizer.measureElement(element);
+            }
+        },
+        [rowVirtualizer]
+    );
+
+    const virtualRows = rowVirtualizer.getVirtualItems();
+    const paddingTop = virtualRows[0]?.start ?? 0;
+    const paddingBottom =
+        virtualRows.length > 0
+            ? rowVirtualizer.getTotalSize() -
+            virtualRows[virtualRows.length - 1].end
+            : 0;
 
     return (
         <Paper elevation={2}>
-
-            <TableContainer>
-                <Table>
-
+            <TableContainer
+                ref={tableContainerRef}
+                sx={{
+                    maxHeight: 600,
+                    overflow: "auto",
+                }}
+            >
+                <Table stickyHeader>
                     <TableHead>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
@@ -77,26 +142,47 @@ const EmployeeTable = ({
                     </TableHead>
 
                     <TableBody>
-                        {
-                            table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id}>
-                                    {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
-                                            {flexRender(
-                                                cell.column.columnDef.cell,
-                                                cell.getContext()
-                                            )}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))
-                        }
+                        {paddingTop > 0 && (
+                            <TableRow aria-hidden="true">
+                                <TableCell
+                                    colSpan={visibleColumnCount}
+                                    sx={{
+                                        border: 0,
+                                        height: paddingTop,
+                                        p: 0,
+                                    }}
+                                />
+                            </TableRow>
+                        )}
+
+                        {virtualRows.map((virtualRow) => {
+                            const row = rows[virtualRow.index];
+
+                            return (
+                                <EmployeeDataRow
+                                    key={row.id}
+                                    measureElement={measureElement}
+                                    row={row}
+                                    virtualIndex={virtualRow.index}
+                                />
+                            );
+                        })}
+
+                        {paddingBottom > 0 && (
+                            <TableRow aria-hidden="true">
+                                <TableCell
+                                    colSpan={visibleColumnCount}
+                                    sx={{
+                                        border: 0,
+                                        height: paddingBottom,
+                                        p: 0,
+                                    }}
+                                />
+                            </TableRow>
+                        )}
                     </TableBody>
-
                 </Table>
-
             </TableContainer>
-
         </Paper>
     );
 };
