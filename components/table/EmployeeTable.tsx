@@ -1,7 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     Paper,
-    type SelectChangeEvent,
     Table,
     TableBody,
     TableCell,
@@ -77,6 +76,8 @@ const EmployeeTable = ({
         pageSize: 25,
     });
 
+    // TanStack Table exposes live instance methods, so this hook is intentionally not compiler-memoized.
+    // eslint-disable-next-line react-hooks/incompatible-library
     const table = useReactTable({
         data,
         columns,
@@ -124,14 +125,11 @@ const EmployeeTable = ({
             virtualRows[virtualRows.length - 1].end
             : 0;
 
-    const handlePageSizeChange = (
-        event: SelectChangeEvent<number>
-    ) => {
-        table.setPageSize(Number(event.target.value));
-    };
-
     useEffect(() => {
-        table.setPageIndex(0);
+        setPagination((currentPagination) => ({
+            ...currentPagination,
+            pageIndex: 0,
+        }));
     }, [globalFilter]);
 
     return (
