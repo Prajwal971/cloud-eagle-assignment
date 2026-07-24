@@ -1,17 +1,31 @@
+import { Box, Typography } from "@mui/material";
 import { generateEmployees } from "../utils/generateEmployees";
+import EmployeeToolbar from "../components/toolbar/EmployeeToolbar";
+import EmployeeTable from "../components/table/EmployeeTable";
+import { useMemo } from "react";
 
 const Home = () => {
-    const employees = generateEmployees(10000);
-
-    console.log(employees);
+    const employees = useMemo(() => generateEmployees(10000), []);
 
     return (
-        <>
-            <h1>User Management</h1>
-            <p> Total Employess : {employees.length}</p>
-        </>
-    );
+        <Box sx={{ p: 4 }}>
+            <Typography variant="h4" sx={{ fontWeight: 700 }}>
+                Employee Management
+            </Typography>
 
+            <Typography
+                variant="body1"
+                color="text.secondary"
+                sx={{ mt: 1, mb: 4 }}
+            >
+                Manage employee information and perform inline editing.
+            </Typography>
+
+            <EmployeeToolbar />
+
+            <EmployeeTable data={employees} />
+        </Box>
+    );
 };
 
 export default Home;
