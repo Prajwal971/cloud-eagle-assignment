@@ -13,6 +13,10 @@ const Home = () => {
     const employees = useAppSelector(
         (state) => state.employee.employees
     );
+
+    const hasUnsavedChanges = useAppSelector(
+        (state) => state.employee.hasUnsavedChanges
+    );
     const [globalFilter, setGlobalFilter] = useState("");
 
 
@@ -23,6 +27,26 @@ const Home = () => {
             )
         );
     }, [dispatch]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+            if (!hasUnsavedChanges) {
+                return;
+            }
+
+            event.preventDefault();
+            event.returnValue = "";
+        };
+
+        window.addEventListener("beforeunload", handleBeforeUnload);
+
+        return () => {
+            window.removeEventListener(
+                "beforeunload",
+                handleBeforeUnload
+            );
+        };
+    }, [hasUnsavedChanges]);
 
     return (
         <Box sx={{ p: 4 }}>
