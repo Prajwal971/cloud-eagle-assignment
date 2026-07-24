@@ -1,4 +1,9 @@
 import { createColumnHelper } from "@tanstack/react-table";
+import EditIcon from "@mui/icons-material/Edit";
+import SaveIcon from "@mui/icons-material/Save";
+import CloseIcon from "@mui/icons-material/Close";
+import UndoIcon from "@mui/icons-material/Undo";
+import { IconButton, Stack } from "@mui/material";
 
 import SortableHeader from "./SortableHeader"
 import type { Employee } from "../../types/employee";
@@ -128,6 +133,31 @@ export const getColumns = () => [
                 title="Joining Date"
                 column={column}
             />
+        ),
+    }),
+
+    columnHelper.display({
+        id: "actions",
+        header: "Actions",
+        enableSorting: false,
+        cell: () => (
+            <Stack direction="row" spacing={1}>
+                <IconButton size="small">
+                    <EditIcon fontSize="small" />
+                </IconButton>
+
+                <IconButton size="small">
+                    <SaveIcon fontSize="small" />
+                </IconButton>
+
+                <IconButton size="small">
+                    <CloseIcon fontSize="small" />
+                </IconButton>
+
+                <IconButton size="small">
+                    <UndoIcon fontSize="small" />
+                </IconButton>
+            </Stack>
         ),
     }),
 

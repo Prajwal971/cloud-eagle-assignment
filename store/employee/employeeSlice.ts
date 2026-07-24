@@ -69,6 +69,27 @@ const employeeSlice = createSlice({
 
             state.hasUnsavedChanges = false;
         },
+
+        cancelEmployee: (
+            state,
+            action: PayloadAction<number>
+        ) => {
+            const original = state.originalEmployees.find(
+                (e) => e.id === action.payload
+            );
+
+            const index = state.employees.findIndex(
+                (e) => e.id === action.payload
+            );
+
+            if (original && index !== -1) {
+                state.employees[index] = { ...original };
+            }
+
+            state.hasUnsavedChanges =
+                JSON.stringify(state.employees) !==
+                JSON.stringify(state.originalEmployees);
+        },
     },
 });
 
@@ -77,6 +98,7 @@ export const {
     updateEmployee,
     saveChanges,
     cancelChanges,
+    cancelEmployee
 } = employeeSlice.actions;
 
 export default employeeSlice.reducer;

@@ -1,12 +1,14 @@
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
     Paper,
+    type SelectChangeEvent,
     Table,
     TableBody,
     TableCell,
     TableContainer,
     TableHead,
     TableRow,
+    TablePagination,
 } from "@mui/material";
 import {
     flexRender,
@@ -16,6 +18,8 @@ import {
     type Row,
     useReactTable,
     type SortingState,
+    getPaginationRowModel,
+    type PaginationState,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 
@@ -68,6 +72,10 @@ const EmployeeTable = ({
     const [sorting, setSorting] = useState<SortingState>([]);
     const columns = useMemo(() => getColumns(), []);
     const tableContainerRef = useRef<HTMLDivElement>(null);
+    const [pagination, setPagination] = useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: 25,
+    });
 
     const table = useReactTable({
         data,
@@ -76,16 +84,16 @@ const EmployeeTable = ({
         state: {
             sorting,
             globalFilter,
+            pagination,
         },
         onGlobalFilterChange,
-
         onSortingChange: setSorting,
+        onPaginationChange: setPagination,
 
         getSortedRowModel: getSortedRowModel(),
-
         getCoreRowModel: getCoreRowModel(),
-
         getFilteredRowModel: getFilteredRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
     });
 
     const { rows } = table.getRowModel();
@@ -115,6 +123,16 @@ const EmployeeTable = ({
             ? rowVirtualizer.getTotalSize() -
             virtualRows[virtualRows.length - 1].end
             : 0;
+
+    const handlePageSizeChange = (
+        event: SelectChangeEvent<number>
+    ) => {
+        table.setPageSize(Number(event.target.value));
+    };
+
+    useEffect(() => {
+        table.setPageIndex(0);
+    }, [globalFilter]);
 
     return (
         <Paper elevation={2}>
@@ -183,7 +201,23 @@ const EmployeeTable = ({
                     </TableBody>
                 </Table>
             </TableContainer>
-        </Paper>
+
+
+            <TablePagination
+                component="div"
+                count={table.getFilteredRowModel().rows.length}
+                page={table.getState().pagination.pageIndex}
+                rowsPerPage={table.getState().pagination.pageSize}
+                onPageChange={(_, newPage) => {
+                    table.setPageIndex(newPage);
+                }}
+                onRowsPerPageChange={(event) => {
+                    table.setPageSize(Number(event.target.value));
+                    table.setPageIndex(0);
+                }}
+                rowsPerPageOptions={[10, 25, 50, 100]}
+            />
+        </Paper >
     );
 };
 
